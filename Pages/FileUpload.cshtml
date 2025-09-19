@@ -1,0 +1,440 @@
+@page
+@using RetireWiseWebApp.Models
+@model RetireWiseWebApp.Pages.FileUploadModel
+@{
+    ViewData["Title"] = "Financial Document Analysis";
+}
+
+<link rel="stylesheet" href="~/css/fileupload.css" asp-append-version="true" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+<div class="upload-container">
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="alert @(Model.Result?.Success == true ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+            @Model.StatusMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.IsConversationActive)
+    {
+        <div class="upload-header">
+            <h1>RetireWise <span class="highlight">Document Analyzer</span></h1>
+            <p class="lead">Upload your financial documents and get personalized insights</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="upload-card card shadow">
+                <div class="card-body">
+                    <div class="upload-area" id="dropZone">
+                        <i class="bi bi-cloud-arrow-up upload-icon"></i>
+                        <h3>Upload Your Documents</h3>
+                        <p>Drag and drop files here or <span class="browse-link">browse</span></p>
+                        <input type="file" name="Files" multiple 
+                               accept=".pdf,.xlsx,.xls,.csv,.txt,.json,.docx" 
+                               class="d-none" 
+                               id="fileInput"
+                               asp-for="Files" />
+                        <div id="fileList" class="file-list"></div>
+                        <span asp-validation-for="Files" class="text-danger d-block mt-2"></span>
+                    </div>
+                    
+                    <div class="message-input mt-4">
+                        <label for="Message"><i class="bi bi-chat-dots"></i> Your Question:</label>
+                        <input type="text" asp-for="Message" class="form-control" placeholder="How can I improve my retirement savings?" />
+                        <span asp-validation-for="Message" class="text-danger"></span>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg submit-btn" id="submitBtn">
+                            <i class="bi bi-rocket-takeoff"></i> Analyze Documents
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    }
+    else
+    {
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2><i class="bi bi-chat-dots"></i> Financial Analysis Chat</h2>
+                <form method="post" asp-page-handler="EndConversation" class="d-inline" id="endChatForm">
+                    <button type="submit" class="btn btn-outline-danger" id="endChatBtn">
+                        <i class="bi bi-x-circle"></i> End Chat
+                    </button>
+                </form>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                @try
+                {
+                    if (Model.Result?.Messages != null && Model.Result.Messages.Any())
+                    {
+                        foreach (var message in Model.Result.Messages.OrderBy(m => m.Timestamp))
+                        {
+                            string messageClass = message.Type switch
+                            {
+                                MessageType.User => "user",
+                                MessageType.Assistant => "assistant",
+                                MessageType.System => "system",
+                                _ => "system"
+                            };
+
+                            <div class="message @messageClass">
+                                <div class="message-content">
+                                    @if (message.Type == MessageType.User)
+                                    {
+                                        <div class="message-bubble">
+                                            <div class="message-text">
+                                                @if (!string.IsNullOrWhiteSpace(message.Content))
+                                                {
+                                                    @message.Content.ToHtml()
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">(Empty message)</span>
+                                                }
+                                            </div>
+                                            <div class="message-time">
+                                                <i class="bi bi-person"></i>
+                                                @message.Timestamp.ToLocalTime().ToString("g")
+                                            </div>
+                                        </div>
+                                        <div class="user-avatar">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                    }
+                                    else if (message.Type == MessageType.Assistant)
+                                    {
+                                        <div class="assistant-avatar">
+                                            <i class="bi bi-robot"></i>
+                                        </div>
+                                        <div class="message-bubble">
+                                            <div class="message-text">
+                                                @if (!string.IsNullOrWhiteSpace(message.Content))
+                                                {
+                                                    @message.Content.ToHtml()
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">(Empty message)</span>
+                                                }
+                                            </div>
+                                            <div class="message-time">
+                                                <i class="bi bi-robot"></i>
+                                                @message.Timestamp.ToLocalTime().ToString("g")
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="message-bubble">
+                                            <div class="message-text">
+                                                @if (!string.IsNullOrWhiteSpace(message.Content))
+                                                {
+                                                    @message.Content.ToHtml()
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">(Empty message)</span>
+                                                }
+                                            </div>
+                                            <div class="message-time">
+                                                <i class="bi bi-info-circle"></i>
+                                                @message.Timestamp.ToLocalTime().ToString("g")
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted p-4">
+                            <i class="bi bi-chat-dots"></i>
+                            <p>No messages yet</p>
+                        </div>
+                    }
+                }
+                catch (Exception ex)
+                {
+                    <div class="alert alert-danger">
+                        Error displaying messages: @ex.Message
+                    </div>
+                }
+            </div>
+
+            <form method="post" asp-page-handler="ContinueConversation" class="chat-input-form" id="chatForm">
+                @Html.AntiForgeryToken()
+                <div class="input-group">
+                    <input type="text" asp-for="Message" class="form-control" placeholder="Type your message..." 
+                           required autocomplete="off" id="messageInput" />
+                    <button type="submit" class="btn btn-primary" id="sendButton">
+                        <i class="bi bi-send"></i> Send
+                    </button>
+                </div>
+                <span asp-validation-for="Message" class="text-danger"></span>
+            </form>
+        </div>
+    }
+</div>
+
+<div id="loadingOverlay" class="loading-overlay d-none">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const fileList = document.getElementById('fileList');
+            const uploadForm = document.getElementById('uploadForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const messagesContainer = document.getElementById('messagesContainer');
+            const chatForm = document.getElementById('chatForm');
+            const messageInput = document.getElementById('messageInput');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
+            // File upload handling
+            if (dropZone) {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => {
+                        dropZone.classList.add('highlight');
+                    });
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => {
+                        dropZone.classList.remove('highlight');
+                    });
+                });
+
+                dropZone.addEventListener('drop', handleDrop);
+                dropZone.querySelector('.browse-link').addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', handleFiles);
+            }
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles({ target: { files: files } });
+                fileInput.files = dt.files;
+            }
+
+            function handleFiles(e) {
+                const files = Array.from(e.target.files);
+                updateFileList(files);
+            }
+
+            function updateFileList(files) {
+                fileList.innerHTML = '';
+                
+                if (files.length > 0) {
+                    const fileCount = document.createElement('div');
+                    fileCount.className = 'file-count';
+                    fileCount.textContent = `${files.length} file(s) selected`;
+                    fileList.appendChild(fileCount);
+
+                    files.forEach(file => {
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-item';
+                        const extension = file.name.split('.').pop().toLowerCase();
+                        const icon = getFileIcon(extension);
+                        fileItem.innerHTML = `<i class="bi ${icon}"></i> ${file.name}`;
+                        fileList.appendChild(fileItem);
+                    });
+                }
+            }
+
+            function getFileIcon(extension) {
+                switch (extension) {
+                    case 'pdf': return 'bi-file-earmark-pdf';
+                    case 'xlsx':
+                    case 'xls': return 'bi-file-earmark-excel';
+                    case 'csv':
+                    case 'txt': return 'bi-file-earmark-text';
+                    case 'docx': return 'bi-file-earmark-word';
+                    case 'json': return 'bi-file-earmark-code';
+                    default: return 'bi-file-earmark';
+                }
+            }
+
+            // Form submission handling
+            if (uploadForm) {
+                uploadForm.addEventListener('submit', (e) => {
+                    if (fileInput.files.length === 0) {
+                        e.preventDefault();
+                        alert('Please select at least one file to upload.');
+                        return;
+                    }
+                    showLoading();
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+                });
+            }
+
+            // End chat form handling
+            const endChatForm = document.getElementById('endChatForm');
+            const endChatBtn = document.getElementById('endChatBtn');
+            
+            if (endChatForm && endChatBtn) {
+                endChatForm.addEventListener('submit', (e) => {
+                    // Show confirmation dialog
+                    if (!confirm('Are you sure you want to end this chat session? This will delete all conversation data and uploaded files.')) {
+                        e.preventDefault();
+                        return;
+                    }
+                    
+                    // Show ending animation
+                    showChatEndingAnimation();
+                    
+                    // Disable button and show loading
+                    endChatBtn.disabled = true;
+                    endChatBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Ending Chat...';
+                    
+                    // Add a slight delay to show the animation
+                    setTimeout(() => {
+                        // Let the form submit normally
+                    }, 500);
+                });
+            }
+
+            // Chat handling
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            if (chatForm) {
+                chatForm.addEventListener('submit', (e) => {
+                    if (!messageInput.value.trim()) {
+                        e.preventDefault();
+                        return;
+                    }
+                    
+                    // Mark form as submitting to prevent cleanup
+                    chatForm.classList.add('submitting');
+                    
+                    // Show typing indicator instead of full screen loading
+                    showTypingIndicator();
+                    
+                    const sendButton = document.getElementById('sendButton');
+                    sendButton.disabled = true;
+                    sendButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                });
+            }
+
+            // Auto-focus message input in chat
+            if (messageInput) {
+                messageInput.focus();
+            }
+
+            // Auto-scroll to bottom after page load
+            setTimeout(() => {
+                if (messagesContainer) {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+                hideLoading();
+            }, 100);
+        });
+
+        function showLoading() {
+            document.getElementById('loadingOverlay')?.classList.remove('d-none');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay')?.classList.add('d-none');
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('messagesContainer');
+            if (messagesContainer) {
+                // Create typing indicator
+                const typingDiv = document.createElement('div');
+                typingDiv.id = 'typing-indicator';
+                typingDiv.className = 'message assistant typing';
+                typingDiv.innerHTML = `
+                    <div class="message-content">
+                        <div class="assistant-avatar">
+                            <i class="bi bi-robot"></i>
+                        </div>
+                        <div class="message-bubble">
+                            <div class="typing-animation">
+                                <span class="typing-dot"></span>
+                                <span class="typing-dot"></span>
+                                <span class="typing-dot"></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                messagesContainer.appendChild(typingDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function showChatEndingAnimation() {
+            const chatContainer = document.querySelector('.chat-container');
+            const messagesContainer = document.getElementById('messagesContainer');
+            
+            if (chatContainer && messagesContainer) {
+                // Add ending message
+                const endingDiv = document.createElement('div');
+                endingDiv.className = 'message system ending';
+                endingDiv.innerHTML = `
+                    <div class="message-content">
+                        <div class="ending-animation">
+                            <i class="bi bi-check-circle text-success"></i>
+                            <div class="ending-text">
+                                <h5>Chat Session Ending</h5>
+                                <p>Cleaning up conversation data and uploaded files...</p>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                messagesContainer.appendChild(endingDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                // Add fade effect to chat container
+                chatContainer.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => {
+                    chatContainer.style.opacity = '0.7';
+                }, 200);
+            }
+        }
+
+        // Hide typing indicator when page loads (after form submission)
+        window.addEventListener('load', function() {
+            hideTypingIndicator();
+        });
+    </script>
+}
