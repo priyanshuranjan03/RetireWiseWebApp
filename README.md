@@ -2,7 +2,7 @@
 
 RetireWise is an intelligent financial planning web application that uses Azure AI Agents to analyze financial documents and provide personalized retirement insights. Built with ASP.NET Core Razor Pages and integrated with Azure AI services.
 
-## ?? Features
+## Features
 
 - **AI-Powered Document Analysis**: Upload financial documents (PDF, Excel, CSV) for intelligent analysis
 - **Interactive Chat Interface**: Conversational AI for personalized financial advice
@@ -11,7 +11,7 @@ RetireWise is an intelligent financial planning web application that uses Azure 
 - **Markdown-Formatted Responses**: Rich text formatting for better readability
 - **Responsive Design**: Modern UI that works on desktop and mobile devices
 
-## ??? Architecture
+## Architecture
 
 - **Frontend**: ASP.NET Core Razor Pages with Bootstrap 5
 - **Backend**: .NET 8 with Azure AI Agents integration
@@ -19,7 +19,7 @@ RetireWise is an intelligent financial planning web application that uses Azure 
 - **Document Processing**: Azure AI File Search with Vector Store
 - **Session Management**: Server-side session state for conversation continuity
 
-## ?? Prerequisites
+## Prerequisites
 
 Before you begin, ensure you have the following installed:
 
@@ -29,7 +29,7 @@ Before you begin, ensure you have the following installed:
 - **Azure Subscription** with AI Services enabled
 - **Git** for version control
 
-## ?? Azure Setup
+## Azure Setup
 
 ### 1. Create Azure AI Project
 
@@ -50,7 +50,7 @@ az login
 az account set --subscription "your-subscription-id"
 ```
 
-## ?? Installation & Setup
+## Installation & Setup
 
 ### 1. Clone the Repository
 
@@ -96,7 +96,7 @@ dotnet restore
 dotnet build
 ```
 
-## ?? Running the Application
+## Running the Application
 
 ### Development Mode
 
@@ -122,7 +122,7 @@ cd publish
 dotnet RetireWiseWebApp.dll
 ```
 
-## ?? Usage Guide
+## Usage Guide
 
 ### 1. Access the Application
 
@@ -154,7 +154,7 @@ dotnet RetireWiseWebApp.dll
 2. Confirm the action in the dialog
 3. All uploaded files and conversation data will be securely deleted
 
-## ?? Configuration Options
+## Configuration Options
 
 ### Session Settings
 
@@ -182,7 +182,7 @@ var allowedExtensions = new[] { ".json", ".txt", ".csv", ".pdf", ".xlsx", ".docx
 if (file.Length > 10 * 1024 * 1024) // 10MB limit
 ```
 
-## ??? Project Structure
+## Project Structure
 
 ```
 RetireWiseWebApp/
@@ -210,14 +210,14 @@ RetireWiseWebApp/
 ??? RetireWiseWebApp.csproj  # Project file
 ```
 
-## ?? Security Features
+## Security Features
 
 - **Encrypted File Processing**: All uploaded files are processed securely
 - **Automatic Cleanup**: Files and conversation data are automatically deleted
 - **Session Management**: Secure server-side session handling
 - **Azure Authentication**: Uses Azure CLI credentials for service authentication
 
-## ?? Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -248,7 +248,7 @@ dotnet run --environment Development
 
 Check the console output for detailed error messages and Azure service responses.
 
-## ?? Dependencies
+## Dependencies
 
 ### Main Packages
 
@@ -266,7 +266,7 @@ Check the console output for detailed error messages and Azure service responses
 - **Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation** - Razor runtime compilation
 - **Microsoft.VisualStudio.Web.CodeGeneration.Design** - Code generation tools
 
-## ?? Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
@@ -274,17 +274,17 @@ Check the console output for detailed error messages and Azure service responses
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## ?? License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## ????? Author
+## Author
 
 **Priyanshu Ranjan**
 - GitHub: [@priyanshuranjan03](https://github.com/priyanshuranjan03)
 - Project: [RetireWiseWebApp](https://github.com/priyanshuranjan03/RetireWiseWebApp)
 
-## ?? Acknowledgments
+## Acknowledgments
 
 - **Azure AI Services** for providing the AI capabilities
 - **Bootstrap** for the responsive UI framework
@@ -293,7 +293,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## ?? Support
+## Support
 
 If you encounter any issues or have questions:
 
@@ -301,4 +301,4 @@ If you encounter any issues or have questions:
 2. Create a new issue with detailed information
 3. Include error messages, logs, and steps to reproduce
 
-**Happy Financial Planning! ????**
+**Happy Financial Planning!**
