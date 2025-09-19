@@ -1,6 +1,7 @@
 using Azure;
 using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
+using Azure.Core;
 using Azure.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -72,12 +74,29 @@ public class PersistentAgentService
     {
         if (_cachedProjectClient == null || _cachedAgentsClient == null)
         {
-            var endpointString = _configuration["PersistentAgent:Endpoint"];
+            var endpointString = _configuration["PersistentAgent:Endpoint"] 
+                ?? _configuration["PersistentAgent_Endpoint"];
             var endpoint = new Uri(endpointString);
-            var credential = new AzureCliCredential();
-            
+
+            // Use ManagedIdentityCredential for Azure App Service, fallback to AzureCliCredential for local development
+            TokenCredential credential;
+
+            if (_configuration["WEBSITE_NAME"] != null)
+            {
+                // Running in Azure App Service - use Managed Identity
+                credential = new ManagedIdentityCredential();
+                _logger.LogInformation("Using ManagedIdentityCredential for Azure App Service");
+            }
+            else
+            {
+                // Running locally - use Azure CLI
+                credential = new AzureCliCredential();
+                _logger.LogInformation("Using AzureCliCredential for local development");
+            }
+
             _cachedProjectClient = new AIProjectClient(endpoint, credential);
             _cachedAgentsClient = _cachedProjectClient.GetPersistentAgentsClient();
+            _logger.LogInformation("Initialized AIProjectClient and PersistentAgentsClient");
         }
 
         return (_cachedProjectClient, _cachedAgentsClient);
@@ -90,7 +109,8 @@ public class PersistentAgentService
         try
         {
             var (projectClient, agentsClient) = await GetClientsAsync();
-            var connectedAgentId = _configuration["PersistentAgent:ConnectedAgentId"];
+            var connectedAgentId = _configuration["PersistentAgent:ConnectedAgentId"] 
+                ?? _configuration["PersistentAgent_ConnectedAgentId"];
 
             // Clean up vector stores
             foreach (var vectorStoreId in ActiveVectorStoreIds)
@@ -189,10 +209,13 @@ public class PersistentAgentService
                     throw new InvalidOperationException("No active conversation. Please start a new one.");
             }
 
-            var mainAgentId = _configuration["PersistentAgent:MainAgentId"];
-            var connectedAgentId = _configuration["PersistentAgent:ConnectedAgentId"];
+            var mainAgentId = _configuration["PersistentAgent:MainAgentId"]
+                ?? _configuration["PersistentAgent_MainAgentId"];
+            var connectedAgentId = _configuration["PersistentAgent:ConnectedAgentId"]
+                ?? _configuration["PersistentAgent_ConnectedAgentId"];
             var responseBuilder = new StringBuilder();
             var fileIds = new List<string>();
+
             FileSearchToolResource? fileSearchRes = null;
             PersistentAgentThread? thread = null;
             
