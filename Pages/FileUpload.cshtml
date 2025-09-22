@@ -185,8 +185,12 @@
 </div>
 
 <div id="loadingOverlay" class="loading-overlay d-none">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
+    <div class="loading-content">
+        <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="loading-text">Processing your request...</div>
+        <div class="loading-subtext">This may take 10-15 seconds</div>
     </div>
 </div>
 
@@ -329,6 +333,10 @@
                         return;
                     }
                     
+                    // Performance tracking for continued conversations
+                    const startTime = Date.now();
+                    console.log('?? Starting continued conversation request at:', new Date().toISOString());
+                    
                     // Mark form as submitting to prevent cleanup
                     chatForm.classList.add('submitting');
                     
@@ -338,6 +346,9 @@
                     const sendButton = document.getElementById('sendButton');
                     sendButton.disabled = true;
                     sendButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                    
+                    // Track timing when page loads after submission
+                    window.continueConversationStartTime = startTime;
                 });
             }
 
@@ -352,15 +363,51 @@
                     messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 }
                 hideLoading();
+                
+                // Performance tracking for continued conversations
+                if (window.continueConversationStartTime) {
+                    const endTime = Date.now();
+                    const duration = endTime - window.continueConversationStartTime;
+                    console.log(`? Continued conversation completed in ${duration}ms (${(duration/1000).toFixed(2)}s)`);
+                    
+                    // Log performance warning if too slow
+                    if (duration > 10000) {
+                        console.warn(`?? Continued conversation took ${(duration/1000).toFixed(2)}s - investigating performance issues`);
+                    }
+                    
+                    // Clear the timing
+                    delete window.continueConversationStartTime;
+                }
             }, 100);
         });
 
         function showLoading() {
             document.getElementById('loadingOverlay')?.classList.remove('d-none');
+            showProcessingStage(0);
         }
 
         function hideLoading() {
             document.getElementById('loadingOverlay')?.classList.add('d-none');
+        }
+
+        function showProcessingStage(stage) {
+            const stages = [
+                "Uploading documents...",
+                "Creating vector store...", 
+                "Initializing AI agent...",
+                "Analyzing documents...",
+                "Generating response..."
+            ];
+            
+            const loadingText = document.querySelector('.loading-text');
+            if (loadingText && stage < stages.length) {
+                loadingText.textContent = stages[stage];
+                
+                // Auto-advance stages for better UX (rough timing)
+                if (stage < stages.length - 1) {
+                    setTimeout(() => showProcessingStage(stage + 1), 3000);
+                }
+            }
         }
 
         function showTypingIndicator() {

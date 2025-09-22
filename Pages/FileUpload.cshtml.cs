@@ -5,6 +5,7 @@ using RetireWiseWebApp.Models;
 using RetireWiseWebApp.Services;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace RetireWiseWebApp.Pages
 {
@@ -39,6 +40,31 @@ namespace RetireWiseWebApp.Pages
 
         [TempData]
         public string? StatusMessage { get; set; }
+
+        [TempData]
+        public string? ChatHistoryJson { get; set; }
+
+        private List<AgentMessage> ChatHistory
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(ChatHistoryJson))
+                    return new List<AgentMessage>();
+                
+                try
+                {
+                    return JsonConvert.DeserializeObject<List<AgentMessage>>(ChatHistoryJson) ?? new List<AgentMessage>();
+                }
+                catch
+                {
+                    return new List<AgentMessage>();
+                }
+            }
+            set
+            {
+                ChatHistoryJson = JsonConvert.SerializeObject(value);
+            }
+        }
 
         public void OnGet()
         {
@@ -139,7 +165,7 @@ namespace RetireWiseWebApp.Pages
                 // Create appropriate result using new formatting
                 if (agentResult.Success)
                 {
-                    Result = FormatAgentResponse(agentResult.Response);
+                    Result = FormatAgentResponse(agentResult.Response, isNewConversation: true);
                     Result.FilesProcessed = tempFilePaths.Count;
                     Result.Message = "Files processed successfully";
                     
@@ -234,7 +260,7 @@ namespace RetireWiseWebApp.Pages
                     isNewConversation: false
                 );
 
-                Result = FormatAgentResponse(agentResult.Response);
+                Result = FormatAgentResponse(agentResult.Response, isNewConversation: false);
                 Result.Success = agentResult.Success;
                 Result.Message = agentResult.Success ? "Conversation continued successfully" : "Failed to continue conversation";
             }
@@ -266,6 +292,10 @@ namespace RetireWiseWebApp.Pages
             try
             {
                 await _agentService.EndConversationAsync();
+                
+                // Clear chat history when ending conversation
+                ChatHistory = new List<AgentMessage>();
+                
                 return RedirectToPage();
             }
             catch (Exception ex)
@@ -290,7 +320,7 @@ namespace RetireWiseWebApp.Pages
             }
         }
 
-        private FileUploadResult FormatAgentResponse(string rawResponse)
+        private FileUploadResult FormatAgentResponse(string rawResponse, bool isNewConversation = true)
         {
             var result = new FileUploadResult
             {
@@ -310,45 +340,46 @@ namespace RetireWiseWebApp.Pages
                 return result;
             }
 
-            // Debug: Log the raw response
-            _logger.LogInformation($"Raw response length: {rawResponse.Length}");
-            _logger.LogInformation($"Raw response content: {rawResponse}");
+            // Get existing chat history
+            var chatHistory = ChatHistory;
 
-            // Extract all assistant message blocks
+            // Add the current user message to history
+            var userMessage = new AgentMessage
+            {
+                Type = MessageType.User,
+                Role = "User",
+                Content = Message,
+                Timestamp = DateTime.UtcNow
+            };
+            chatHistory.Add(userMessage);
+
+            // Extract only the latest assistant message from raw response
             var assistantBlocks = ExtractAllAssistantMessages(rawResponse);
             
-            // Debug: Log parsed messages
             _logger.LogInformation($"Parsed {assistantBlocks.Count} assistant message blocks");
-            for (int i = 0; i < assistantBlocks.Count; i++)
-            {
-                _logger.LogInformation($"Assistant message {i}: Length={assistantBlocks[i].Length}, Content={assistantBlocks[i]}");
-            }
 
-            // Assemble complete chat transcript for the UI
-            result.Messages = new List<AgentMessage>
+            // Add only the latest assistant response to history
+            if (assistantBlocks.Any())
             {
-                new AgentMessage
+                var latestAssistantMessage = assistantBlocks.Last(); // Get the most recent response
+                if (!string.IsNullOrWhiteSpace(latestAssistantMessage))
                 {
-                    Type = MessageType.User,
-                    Role = "User",
-                    Content = Message,
-                    Timestamp = DateTime.UtcNow
-                }
-            };
-
-            foreach (var ablock in assistantBlocks)
-            {
-                if (!string.IsNullOrWhiteSpace(ablock))
-                {
-                    result.Messages.Add(new AgentMessage
+                    var assistantMessage = new AgentMessage
                     {
                         Type = MessageType.Assistant,
                         Role = "Assistant",
-                        Content = ablock,
+                        Content = latestAssistantMessage,
                         Timestamp = DateTime.UtcNow
-                    });
+                    };
+                    chatHistory.Add(assistantMessage);
                 }
             }
+
+            // Update the persistent chat history
+            ChatHistory = chatHistory;
+
+            // Return the complete chat history for display
+            result.Messages = chatHistory;
 
             return result;
         }
