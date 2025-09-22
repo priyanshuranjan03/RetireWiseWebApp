@@ -1,8 +1,183 @@
 ﻿@page
 @model PrivacyModel
 @{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Privacy Policy - RetireWise";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<link rel="stylesheet" href="~/css/privacy.css" asp-append-version="true" />
+
+<div class="privacy-container">
+    <div class="container">
+        <div class="privacy-header">
+            <h1>Privacy Policy</h1>
+            <p class="last-updated">Last updated: @DateTime.Now.ToString("MMMM dd, yyyy")</p>
+        </div>
+
+        <div class="privacy-content">
+            <div class="alert alert-info">
+                <i class="bi bi-shield-check"></i>
+                <strong>Your Privacy is Our Priority:</strong> RetireWise is committed to protecting your personal and financial information. This policy explains how we collect, use, and safeguard your data.
+            </div>
+
+            <section class="privacy-section">
+                <h2>1. Information We Collect</h2>
+                
+                <h3>Personal Information</h3>
+                <p>When you use RetireWise, we may collect the following types of information:</p>
+                <ul>
+                    <li><strong>Account Information:</strong> Name, email address, and other contact details</li>
+                    <li><strong>Financial Documents:</strong> Bank statements, investment portfolios, expense reports, and other financial documents you upload</li>
+                    <li><strong>Usage Data:</strong> Information about how you interact with our service, including session data and preferences</li>
+                    <li><strong>Technical Data:</strong> IP address, browser type, device information, and cookies</li>
+                </ul>
+
+                <h3>Automatically Collected Information</h3>
+                <p>We automatically collect certain information when you use our service:</p>
+                <ul>
+                    <li>Log data and analytics information</li>
+                    <li>Session information and conversation history</li>
+                    <li>Error reports and performance data</li>
+                </ul>
+            </section>
+
+            <section class="privacy-section">
+                <h2>2. How We Use Your Information</h2>
+                
+                <p>We use your information for the following purposes:</p>
+                <ul>
+                    <li><strong>AI Financial Analysis:</strong> To analyze your financial documents and provide personalized retirement planning advice</li>
+                    <li><strong>Service Improvement:</strong> To enhance our AI models and improve the accuracy of our recommendations</li>
+                    <li><strong>Communication:</strong> To respond to your questions and provide customer support</li>
+                    <li><strong>Security:</strong> To protect against fraud, unauthorized access, and other security threats</li>
+                    <li><strong>Legal Compliance:</strong> To comply with applicable laws and regulations</li>
+                </ul>
+            </section>
+
+            <section class="privacy-section">
+                <h2>3. Data Security and Protection</h2>
+                
+                <div class="security-features">
+                    <div class="security-item">
+                        <i class="bi bi-shield-lock"></i>
+                        <div>
+                            <h4>Encryption</h4>
+                            <p>All data is encrypted in transit and at rest using industry-standard encryption protocols.</p>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <i class="bi bi-cloud-check"></i>
+                        <div>
+                            <h4>Secure Cloud Infrastructure</h4>
+                            <p>We use Microsoft Azure's secure cloud infrastructure with enterprise-grade security measures.</p>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <i class="bi bi-trash"></i>
+                        <div>
+                            <h4>Automatic Data Deletion</h4>
+                            <p>Uploaded documents and conversation data are automatically deleted after your session ends.</p>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <i class="bi bi-person-check"></i>
+                        <div>
+                            <h4>Access Controls</h4>
+                            <p>Strict access controls ensure only authorized personnel can access system infrastructure.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="privacy-section">
+                <h2>4. Data Sharing and Disclosure</h2>
+                
+                <p>We do not sell, trade, or otherwise transfer your personal information to third parties, except in the following circumstances:</p>
+                
+                <h3>Service Providers</h3>
+                <p>We may share information with trusted third-party service providers who assist us in:</p>
+                <ul>
+                    <li>Azure AI Services for document analysis and AI processing</li>
+                    <li>Cloud hosting and infrastructure services</li>
+                    <li>Analytics and performance monitoring</li>
+                </ul>
+
+                <h3>Legal Requirements</h3>
+                <p>We may disclose your information if required by law or in response to valid legal processes.</p>
+            </section>
+
+            <section class="privacy-section">
+                <h2>5. Data Retention</h2>
+                
+                <p>We follow a strict data retention policy:</p>
+                <ul>
+                    <li><strong>Uploaded Documents:</strong> Automatically deleted when you end your chat session</li>
+                    <li><strong>Conversation Data:</strong> Removed immediately after session completion</li>
+                    <li><strong>System Logs:</strong> Retained for 30 days for security and debugging purposes</li>
+                    <li><strong>Analytics Data:</strong> Anonymized and aggregated data may be retained for service improvement</li>
+                </ul>
+            </section>
+
+            <section class="privacy-section">
+                <h2>6. Your Rights and Choices</h2>
+                
+                <p>You have the following rights regarding your personal information:</p>
+                
+                <div class="rights-grid">
+                    <div class="right-item">
+                        <h4>Access</h4>
+                        <p>Request access to the personal information we have about you</p>
+                    </div>
+                    <div class="right-item">
+                        <h4>Correction</h4>
+                        <p>Request correction of inaccurate or incomplete information</p>
+                    </div>
+                    <div class="right-item">
+                        <h4>Deletion</h4>
+                        <p>Request deletion of your personal information</p>
+                    </div>
+                    <div class="right-item">
+                        <h4>Portability</h4>
+                        <p>Request a copy of your data in a portable format</p>
+                    </div>
+                </div>
+            </section>
+
+            @* <section class="privacy-section">
+                <h2>7. Contact Information</h2>
+                
+                <p>If you have any questions, concerns, or requests regarding this Privacy Policy or your personal information, please contact us:</p>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="bi bi-envelope"></i>
+                        <div>
+                            <strong>Email:</strong>
+                            <a href="mailto:privacy@retirewise.com">privacy@retirewise.com</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="bi bi-github"></i>
+                        <div>
+                            <strong>GitHub:</strong>
+                            <a href="https://github.com/priyanshuranjan03/RetireWiseWebApp" target="_blank">RetireWiseWebApp</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="bi bi-person-badge"></i>
+                        <div>
+                            <strong>Developer:</strong>
+                            <a href="https://github.com/priyanshuranjan03" target="_blank">Priyanshu Ranjan</a>
+                        </div>
+                    </div>
+                </div>
+            </section> *@
+
+            <div class="privacy-footer">
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i>
+                    <strong>Thank you for trusting RetireWise with your financial planning needs.</strong> We are committed to maintaining the highest standards of privacy and security for your information.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
